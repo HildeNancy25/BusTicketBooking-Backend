@@ -1,0 +1,4 @@
+{
+  "mongoURI": "mongodb+srv://perfectizihirwe:Perfect078@cluster0.f5rjgbi.mongodb.net/?retryWrites=true&w=majority",
+  "jwtSecret": "mysecrettoken"
+}
