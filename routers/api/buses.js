@@ -63,7 +63,7 @@ router.put("/updatePosition/:id", async (req, res) => {
 // @desc   Get a bus based on route and busStation
 // @access Public
 
-router.get("/busBasedOnRouteAndDestination", async (req, res) => {
+router.get("/activeBuses", async (req, res) => {
   try {
     const { routeId, destinationStationId } = req.body;
     const bus = await Buses.find({ routeId: routeId });
