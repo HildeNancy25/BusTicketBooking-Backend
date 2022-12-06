@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const auth = require("../../middleware/auth");
 const User = require("../../models/Users");
+const Driver = require("../../models/Driver");
 const jwt = require("jsonwebtoken");
 const config = require("config");
 const { check, validationResult } = require("express-validator");
@@ -93,6 +94,25 @@ router.post(
     const { email, password } = req.body;
 
     try {
+      if (email.includes("driver")) {
+        let driver = await Driver.findOne({ email });
+        if (!driver) {
+          return res.status(400).json({ errors: [{ msg: "invalid data" }] });
+        }
+        const isMatch = await bcrypt.compare(password, driver.password);
+        if (!isMatch) {
+          return res.status(400).json({ errors: [{ msg: "invalid data" }] });
+        }
+        jwt.sign(
+          payload,
+          config.get("jwtSecret"),
+          { expiresIn: 9999999 },
+          (err, token) => {
+            if (err) throw err;
+            res.json({ token: token, role: "driver" });
+          }
+        );
+      }
       let user = await User.findOne({ email });
 
       if (!user) {
@@ -110,10 +130,8 @@ router.post(
         },
       };
 
-      if (email.contains("admin")) {
+      if (email.includes("admin")) {
         const role = "admin";
-      } else if (email.contains("driver")) {
-        const role = "driver";
       } else {
         const role = "user";
       }
