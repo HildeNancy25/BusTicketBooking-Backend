@@ -103,6 +103,11 @@ router.post(
         if (!isMatch) {
           return res.status(400).json({ errors: [{ msg: "invalid data" }] });
         }
+        const payload = {
+          driver: {
+            id: driver.id,
+          },
+        };
         jwt.sign(
           payload,
           config.get("jwtSecret"),
