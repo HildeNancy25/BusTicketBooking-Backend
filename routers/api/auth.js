@@ -109,7 +109,7 @@ router.post(
           { expiresIn: 9999999 },
           (err, token) => {
             if (err) throw err;
-            res.json({ token: token, role: "driver" });
+            return res.json({ token: token, role: "driver" });
           }
         );
       }
