@@ -63,7 +63,7 @@ router.put("/updatePosition/:id", async (req, res) => {
 // @desc   Get a bus based on route and busStation
 // @access Public
 
-router.get("/activeBuses", async (req, res) => {
+router.post("/activeBuses", async (req, res) => {
   try {
     const { routeId, destinationStationId } = req.body;
     console.log(req.body);
@@ -74,7 +74,7 @@ router.get("/activeBuses", async (req, res) => {
     console.log(busStation, "BUSSTATION");
     const route = await Route.find({ _id: routeId });
     console.log(route, "ROUTE");
-    if (busStation[0].name === route[0].busStation1) {
+    if (busStation[0]?.name === route[0].busStation1) {
       const availableBuses = await Buses.find({ position: "Station2" });
       console.log(availableBuses, "AVAILABLEBUSES");
       if (availableBuses.length === 0) {
@@ -83,7 +83,7 @@ router.get("/activeBuses", async (req, res) => {
         return res.status(200).json({ data: availableBuses });
       }
     }
-    if (busStation[0].name === route[0].busStation2) {
+    if (busStation[0]?.name === route[0].busStation2) {
       const availableBuses = await Buses.find({ position: "Station1" });
       if (availableBuses.length === 0) {
         return res.status(400).json({ msg: "No buses available" });
