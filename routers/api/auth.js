@@ -105,7 +105,7 @@ router.post(
         }
         const payload = {
           driver: {
-            id: driver.id,
+            id: driver._id,
           },
         };
         jwt.sign(
@@ -117,7 +117,8 @@ router.post(
             return res.json({ token: token, role: "driver" });
           }
         );
-      } else {
+      }
+      if (email.includes("gmail")) {
         let user = await User.findOne({ email });
 
         if (!user) {
@@ -131,15 +132,9 @@ router.post(
 
         const payload = {
           user: {
-            id: user.id,
+            id: user._id,
           },
         };
-
-        if (email.includes("admin")) {
-          const role = "admin";
-        } else {
-          const role = "user";
-        }
 
         jwt.sign(
           payload,
@@ -147,7 +142,36 @@ router.post(
           { expiresIn: 9999999 },
           (err, token) => {
             if (err) throw err;
-            res.json({ token, role });
+            res.json({ token: token, role: "user" });
+          }
+        );
+      }
+
+      if (email.includes("admin")) {
+        let user = await User.findOne({ email });
+
+        if (!user) {
+          return res.status(400).json({ errors: [{ msg: "invalid data" }] });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+          return res.status(400).json({ errors: [{ msg: "invalid data" }] });
+        }
+
+        const payload = {
+          user: {
+            id: user._id,
+          },
+        };
+
+        jwt.sign(
+          payload,
+          config.get("jwtSecret"),
+          { expiresIn: 9999999 },
+          (err, token) => {
+            if (err) throw err;
+            res.json({ token: token, role: "admin" });
           }
         );
       }
