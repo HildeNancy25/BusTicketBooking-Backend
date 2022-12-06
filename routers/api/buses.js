@@ -66,17 +66,12 @@ router.put("/updatePosition/:id", async (req, res) => {
 router.post("/activeBuses", async (req, res) => {
   try {
     const { routeId, destinationStationId } = req.body;
-    console.log(req.body);
     const bus = await Buses.find({ routeId: routeId });
-    console.log(bus, "BUS");
     if (!bus) throw Error("No bus found");
     const busStation = await BusStation.find({ _id: destinationStationId });
-    console.log(busStation, "BUSSTATION");
     const route = await Route.find({ _id: routeId });
-    console.log(route, "ROUTE");
     if (busStation[0]?.name === route[0].busStation1) {
       const availableBuses = await Buses.find({ position: "Station2" });
-      console.log(availableBuses, "AVAILABLEBUSES");
       if (availableBuses.length === 0) {
         return res.status(400).json({ msg: "No buses available" });
       } else {

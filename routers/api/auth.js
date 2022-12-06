@@ -110,13 +110,21 @@ router.post(
         },
       };
 
+      if (email.contains("admin")) {
+        const role = "admin";
+      } else if (email.contains("driver")) {
+        const role = "driver";
+      } else {
+        const role = "user";
+      }
+
       jwt.sign(
         payload,
         config.get("jwtSecret"),
         { expiresIn: 9999999 },
         (err, token) => {
           if (err) throw err;
-          res.json({ token });
+          res.json({ token, role });
         }
       );
     } catch (err) {
