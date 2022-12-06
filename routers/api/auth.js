@@ -117,39 +117,40 @@ router.post(
             return res.json({ token: token, role: "driver" });
           }
         );
-      }
-      let user = await User.findOne({ email });
-
-      if (!user) {
-        return res.status(400).json({ errors: [{ msg: "invalid data" }] });
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ errors: [{ msg: "invalid data" }] });
-      }
-
-      const payload = {
-        user: {
-          id: user.id,
-        },
-      };
-
-      if (email.includes("admin")) {
-        const role = "admin";
       } else {
-        const role = "user";
-      }
+        let user = await User.findOne({ email });
 
-      jwt.sign(
-        payload,
-        config.get("jwtSecret"),
-        { expiresIn: 9999999 },
-        (err, token) => {
-          if (err) throw err;
-          res.json({ token, role });
+        if (!user) {
+          return res.status(400).json({ errors: [{ msg: "invalid data" }] });
         }
-      );
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+          return res.status(400).json({ errors: [{ msg: "invalid data" }] });
+        }
+
+        const payload = {
+          user: {
+            id: user.id,
+          },
+        };
+
+        if (email.includes("admin")) {
+          const role = "admin";
+        } else {
+          const role = "user";
+        }
+
+        jwt.sign(
+          payload,
+          config.get("jwtSecret"),
+          { expiresIn: 9999999 },
+          (err, token) => {
+            if (err) throw err;
+            res.json({ token, role });
+          }
+        );
+      }
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server Error");
