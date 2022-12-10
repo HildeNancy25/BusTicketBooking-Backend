@@ -84,7 +84,7 @@ router.post("/pay", async (req, res) => {
       active: true,
     });
     if (ticketExists) {
-      return res.json({ errors: [{ msg: "Ticket already exists" }] });
+      return res.json({ message: "Ticket already exists" });
     }
     let ticket = new Ticket({
       userId,
