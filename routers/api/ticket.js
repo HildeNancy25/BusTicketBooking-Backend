@@ -14,7 +14,7 @@ const nodemailer = require("nodemailer");
 router.get("/user/:id", async (req, res) => {
   try {
     const tickets = await Ticket.find({ userId: req.params.id, active: true })
-      .populate("busId")
+      .populate({ path: "busId", populate: { path: "driverId" } })
       .populate("userId");
     if (!tickets) throw Error("You have no tickets");
     return res.status(200).json(tickets);
