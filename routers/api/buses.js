@@ -45,7 +45,7 @@ router.post("/addBus", async (req, res) => {
 // @desc Update bus position
 // @access Public
 
-router.put("/updatePosition/:id", async (req, res) => {
+router.patch("/updatePosition/:id", async (req, res) => {
   try {
     const { position } = req.body;
     let bus = await Buses.findById(req.params.id);

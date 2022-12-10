@@ -12,6 +12,7 @@ const BusSchema = new mongoose.Schema({
   driverId: {
     type: mongoose.Schema.Types.ObjectId,
     default: null,
+    ref: Driver,
   },
   date: {
     type: Date,

@@ -13,12 +13,61 @@ const nodemailer = require("nodemailer");
 
 router.get("/user/:id", async (req, res) => {
   try {
-    const tickets = await Ticket.find({ userId: req.params.id });
-    if (!tickets) throw Error("Ypu have no tickets");
+    const tickets = await Ticket.find({ userId: req.params.id, active: true })
+      .populate("busId")
+      .populate("userId");
+    if (!tickets) throw Error("You have no tickets");
     return res.status(200).json(tickets);
   } catch (err) {
     console.error(err);
     res.status(500).send("Server Error");
+  }
+});
+
+// @route   GET api/tickets/purchaseHistory/:id
+// @desc    Get all used tickets of a user
+// @access  Public
+
+router.get("/purchaseHistory/:id", async (req, res) => {
+  try {
+    const tickets = await Ticket.find({ userId: req.params.id, active: false })
+      .populate("busId")
+      .populate("userId");
+    if (!tickets) throw Error("You have no tickets");
+    return res.status(200).json(tickets);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server Error");
+  }
+});
+
+// @route  GET api/tickets/getPassengers
+// @desc   Driver to get all passengers
+// @access Public
+
+router.get("/getPassengers/:busId", async (req, res) => {
+  try {
+    const { busId } = req.params;
+    const passengers = await Ticket.find({ busId, active: true });
+    return res.json({ passengers });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).send("Server Error");
+  }
+});
+
+// @route  GET api/tickets/ticketUsed
+// @desc   Driver to mark ticket as used
+// @access Public
+
+router.get("/ticketUsed/:ticketId", async (req, res) => {
+  try {
+    const { ticketId } = req.params;
+    await Ticket.findOneAndUpdate({ _id: ticketId }, { active: false });
+    return res.json({ message: "Ticket used" });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).send("Server Error");
   }
 });
 
@@ -28,41 +77,24 @@ router.get("/user/:id", async (req, res) => {
 
 router.post("/pay", async (req, res) => {
   try {
-    const { busId, userId } = req.body;
+    const { busId, userId, boardingPoint } = req.body;
+    let ticketExists = await Ticket.findOne({
+      busId,
+      userId,
+      active: true,
+    });
+    if (ticketExists) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Ticket already exists" }] });
+    }
     let ticket = new Ticket({
       userId,
       busId,
+      boardingPoint,
     });
-    const bus = await Buses.findById(busId);
-    if (!bus) throw Error("No bus found");
-    let price = bus.fare;
-    // send email to user
-    // let testAccount = await nodemailer.createTestAccount();
-    // let transporter = nodemailer.createTransport({
-    //   host: "smtp.ethereal.email",
-    //   port: 587,
-    //   secure: false, // true for 465, false for other ports
-    //   auth: {
-    //     user: testAccount.user, // generated ethereal user
-    //     pass: testAccount.pass, // generated ethereal password
-    //   },
-    // });
-    // transporter
-    //   .sendMail({
-    //     from: "<perfectizihirwe@gmail.com>", // sender address
-    //     to: "perfectgiftizihirwe@gmail.com", // list of receivers
-    //     subject: "Bus Ticket Booking", // Subject line
-    //     text: "Hello, hope you are doing great, your ticket for bus RAB 450 E is EY54H23EV", // plain text body
-    //   })
-    //   .then((info) => {
-    //     console.log(info);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
     await ticket.save();
     return res.json({ message: "Ticket booked successfully" });
-    // res.json({ clientSecret: paymentIntent.client_secret });
   } catch (err) {
     console.error(err.message);
     return res.status(500).send("Server Error");

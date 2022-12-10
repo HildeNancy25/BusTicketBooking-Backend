@@ -30,7 +30,6 @@ router.post("/addRoute", async (req, res) => {
       busStation2,
       routeNumber,
     });
-    console.log(route);
     await route.save();
     res.send(route);
   } catch (err) {
@@ -47,7 +46,7 @@ router.get("/busStations", async (req, res) => {
   try {
     const stations = await BusStation.find();
     if (!stations) throw Error("No stations");
-    res.status(200).json(stations); 
+    res.status(200).json(stations);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -61,6 +60,10 @@ router.get("/busStations", async (req, res) => {
 router.post("/addBusStation", async (req, res) => {
   try {
     const { name } = req.body;
+    let stationExists = await BusStation.findOne({ name });
+    if (stationExists) {
+      return res.status(400).json({ msg: "Station already exists" });
+    }
     let station = new BusStation({
       name,
     });

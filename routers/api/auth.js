@@ -20,64 +20,51 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-router.post(
-  "/register",
-  [
-    check("name", "Name is required").not().isEmpty(),
-    check("email", "Please add a valid email").isEmail(),
-    check("password", "please enter a password").isLength({ min: 6 }),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+router.post("/register", async (req, res) => {
+  const { name, email, password, contact, dob, gender } = req.body;
+
+  try {
+    let user = await User.findOne({ email });
+
+    if (user) {
+      res.status(400).json({ errors: [{ msg: "User already exists" }] });
     }
 
-    const { name, email, password, contact, dob, gender } = req.body;
+    user = new User({
+      name,
+      email,
+      password,
+      contact,
+      dob,
+      gender,
+    });
 
-    try {
-      let user = await User.findOne({ email });
+    user.password = await bcrypt.hash(password, 12);
 
-      if (user) {
-        res.status(400).json({ errors: [{ msg: "User already exists" }] });
+    await user.save();
+
+    const payload = {
+      user: {
+        id: user.id,
+      },
+    };
+
+    jwt.sign(
+      payload,
+      config.get("jwtSecret"),
+      { expiresIn: 360000 },
+      (err, token) => {
+        if (err) throw err;
+        res.json({ token });
       }
+    );
 
-      user = new User({
-        name,
-        email,
-        password,
-        contact,
-        dob,
-        gender,
-      });
-
-      user.password = await bcrypt.hash(password, 12);
-
-      await user.save();
-
-      const payload = {
-        user: {
-          id: user.id,
-        },
-      };
-
-      jwt.sign(
-        payload,
-        config.get("jwtSecret"),
-        { expiresIn: 360000 },
-        (err, token) => {
-          if (err) throw err;
-          res.json({ token });
-        }
-      );
-
-      // res.send('User registered');
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send("Server Error");
-    }
+    // res.send('User registered');
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
   }
-);
+});
 
 router.post(
   "/login",
@@ -114,7 +101,7 @@ router.post(
           { expiresIn: 9999999 },
           (err, token) => {
             if (err) throw err;
-            return res.json({ token: token, role: "driver" });
+            return res.json({ token: token, role: "driver", user: driver });
           }
         );
       }
@@ -142,7 +129,7 @@ router.post(
           { expiresIn: 9999999 },
           (err, token) => {
             if (err) throw err;
-            res.json({ token: token, role: "user" });
+            res.json({ token: token, role: "user", user: user });
           }
         );
       }
@@ -171,7 +158,7 @@ router.post(
           { expiresIn: 9999999 },
           (err, token) => {
             if (err) throw err;
-            res.json({ token: token, role: "admin" });
+            res.json({ token: token, role: "admin", user: user });
           }
         );
       }
