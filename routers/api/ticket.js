@@ -31,7 +31,7 @@ router.get("/user/:id", async (req, res) => {
 router.get("/purchaseHistory/:id", async (req, res) => {
   try {
     const tickets = await Ticket.find({ userId: req.params.id, active: false })
-      .populate("busId")
+      .populate({ path: "busId", populate: { path: "driverId" } })
       .populate("userId");
     if (!tickets) throw Error("You have no tickets");
     return res.status(200).json(tickets);
@@ -48,7 +48,9 @@ router.get("/purchaseHistory/:id", async (req, res) => {
 router.get("/getPassengers/:busId", async (req, res) => {
   try {
     const { busId } = req.params;
-    const passengers = await Ticket.find({ busId, active: true });
+    const passengers = await Ticket.find({ busId, active: true })
+      .populate({ path: "busId", populate: { path: "driverId" } })
+      .populate("userId");
     return res.json({ passengers });
   } catch (err) {
     console.error(err.message);
