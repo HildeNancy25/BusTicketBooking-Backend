@@ -31,7 +31,6 @@ router.post("/addDriver", async (req, res) => {
     if (Bus.driverId) {
       return res.status(400).json({ msg: "Bus already has a driver" });
     }
-
     if (existingDriver) {
       return res
         .status(400)
