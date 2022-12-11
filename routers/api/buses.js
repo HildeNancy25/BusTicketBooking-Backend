@@ -27,6 +27,10 @@ router.get("/", async (req, res) => {
 router.post("/addBus", async (req, res) => {
   try {
     const { name, company, routeId, fare } = req.body;
+    const exists = await Buses.find({ name });
+    if (exists) {
+      return res.status(400).json({ message: "Bus already exists" });
+    }
     let bus = new Buses({
       name,
       company,

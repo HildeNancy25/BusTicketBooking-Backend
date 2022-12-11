@@ -27,6 +27,10 @@ router.post("/addDriver", async (req, res) => {
   try {
     const { name, email, password, busId, gender } = req.body;
     let existingDriver = await Driver.findOne({ email });
+    let Bus = await Buses.findById(busId);
+    if (Bus.driverId) {
+      return res.status(400).json({ msg: "Bus already has a driver" });
+    }
 
     if (existingDriver) {
       return res
