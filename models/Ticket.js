@@ -19,7 +19,6 @@ const TicketSchema = new mongoose.Schema({
   },
   destination: {
     type: String,
-    required: true,
   },
   active: {
     type: Boolean,
