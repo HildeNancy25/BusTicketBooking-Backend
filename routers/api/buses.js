@@ -93,4 +93,21 @@ router.post("/activeBuses", async (req, res) => {
   }
 });
 
+// @route  DELETE api/buses/:id
+// @desc   Delete a bus
+// @access Public
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const bus = await Buses.findById(req.params.id);
+    if (!bus) throw Error("No bus found");
+    const removed = await bus.remove();
+    if (!removed)
+      throw Error("Something went wrong while trying to delete the bus");
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(400).json({ msg: error.message, success: false });
+  }
+});
+
 module.exports = router;
