@@ -1,11 +1,14 @@
 const express = require("express");
 const Ticket = require("../../models/Ticket");
+const User = require("../../models/Users");
 const Buses = require("../../models/Buses");
 const router = express.Router();
-const config = require("../../config/stripe.json");
-const STRIPE_SECRET_KEY = config.STRIPE_SECRET_KEY;
-const stripe = require("stripe")(STRIPE_SECRET_KEY);
-const nodemailer = require("nodemailer");
+var Paypack = require("paypack-js");
+Paypack.config({
+  client_id: "cc56cc3e-8e9f-11ed-a3eb-dead986dd4f7",
+  client_secret:
+    "8a3f9ea4b510b0c8dc2a10fbf4fd43dbda39a3ee5e6b4b0d3255bfef95601890afd80709",
+});
 
 // @route   GET api/tickets/user/:id
 // @desc    Get all ticket of a user
@@ -88,6 +91,19 @@ router.post("/pay", async (req, res) => {
     if (ticketExists) {
       return res.json({ message: "Ticket already exists" });
     }
+    let user = await User.findById(userId);
+    let bus = await Buses.findById(busId);
+    Paypack.cashin({
+      number: user.contact,
+      amount: bus.fare,
+      environment: "development",
+    })
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     let ticket = new Ticket({
       userId,
       busId,
