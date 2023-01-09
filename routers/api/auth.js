@@ -91,6 +91,15 @@ router.post(
         if (!isMatch) {
           return res.status(400).json({ errors: [{ msg: "invalid data" }] });
         }
+        let bus = await Bus.findById(driver.busId);
+        let result = {
+          _id: driver._id,
+          name: driver.name,
+          email: driver.email,
+          gender: driver.gender,
+          bus: bus,
+        };
+
         const payload = {
           driver: {
             id: driver._id,
@@ -102,7 +111,7 @@ router.post(
           { expiresIn: 9999999 },
           (err, token) => {
             if (err) throw err;
-            return res.json({ token: token, role: "driver", user: driver });
+            return res.json({ token: token, role: "driver", user: result });
           }
         );
       }
