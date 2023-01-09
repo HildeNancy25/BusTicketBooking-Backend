@@ -110,7 +110,7 @@ router.post("/pay", async (req, res) => {
       boardingPoint,
     });
     await ticket.save();
-    return res.json({ message: "Ticket booked successfully" });
+    return res.json({ message: "Confirm payment to finish" });
   } catch (err) {
     console.error(err.message);
     return res.status(500).send("Server Error");
